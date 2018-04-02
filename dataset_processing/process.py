@@ -34,10 +34,11 @@ def main(args):
         if args["convert_to_temp"]:
             image_dict["low"] = string_to_int(
                 pytesseract.image_to_string(
-                    Image.open(full_path).crop((30, 0, 90, 30))))
+                    Image.open(full_path).rotate(90, expand=True).crop((30, 0, 90, 30))))
             image_dict["high"] = string_to_int(
                 pytesseract.image_to_string(
-                    Image.open(full_path).crop((30, 1250, 90, 1280))))
+                    Image.open(full_path).rotate(90, expand=True).crop((30, 1250, 90, 1280))))
+
         if args["filter_scale"]:
             # TODO(charlie): implement
             pass
