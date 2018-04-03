@@ -65,11 +65,13 @@ def bw(image,th): #binary threshold an image
     
     return bw_im
     
-def label(img_path,doorX1,doorX2,doorY1,doorY2,im_name="example"):
+def label(img_path,doorX1,doorX2,doorY1,doorY2,im_name="example",image = None):
     #Door X,Y specify bounding box of door within the original image
     
     im = cv2.imread(img_path,0)
     #plt.imshow(im,cmap='gray')
+    
+    plt.imshow(im)
     
     ##### Denoise image###########
     im_denoised = cv2.bilateralFilter(im,9,150,150) 
@@ -77,7 +79,7 @@ def label(img_path,doorX1,doorX2,doorY1,doorY2,im_name="example"):
     comp = np.concatenate((im,im_denoised),axis=1)
     cv2.imwrite("denoised.jpg", comp)
     
-    im = im_denoised
+    #im = im_denoised
     
     ##### Read temperature scales #####
     im_get_temp = bw(im,200) #Threshold black white makes pytesseract readings more accurate
@@ -89,7 +91,7 @@ def label(img_path,doorX1,doorX2,doorY1,doorY2,im_name="example"):
             temp_hi = int(temp_hi[:idx])
             break
     
-    plt.imshow(im_get_temp[LOW_TOP:,SCALE_LEFT:SCALE_RIGHT],cmap='gray')
+    #plt.imshow(im_get_temp[LOW_TOP:,SCALE_LEFT:SCALE_RIGHT],cmap='gray')
     temp_low = pytesseract.image_to_string(im_get_temp[LOW_TOP:,SCALE_LEFT:SCALE_RIGHT])
     #print(temp_low)
     
@@ -137,7 +139,6 @@ def label(img_path,doorX1,doorX2,doorY1,doorY2,im_name="example"):
     leaks = np.uint8(leaks*255)
     borders = cv2.Canny(leaks,2,4) 
     
-    
     #door_ogrgb = cv2.cvtColor(door_og,cv2.COLOR_GRAY2RGB)
     
     #Plot original door on a figure then plot outline
@@ -153,7 +154,8 @@ def label(img_path,doorX1,doorX2,doorY1,doorY2,im_name="example"):
     plt.subplot(121)
     plt.imshow(door_og,cmap='gray')
     plt.title("original")
-    plt.savefig("final/" + im_name+".jpg")
+    #plt.savefig("final/" + im_name+".jpg")
+    plt.savefig(im_name)
     plt.close()
     
 if __name__ == '__main__':
