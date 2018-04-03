@@ -2,8 +2,10 @@ import door_detection.hog_door_detector.detector as door_detector
 import dataset_processing.label as label
 import numpy as np
 import cv2
+import dataset_processing.parameters as parameters
 
 HOG = door_detector.HOGDetector("door_detection/hog_door_detector/model")
+pa = parameters.Parameters()
 
 def process(image_path):
     image = cv2.imread(image_path)
@@ -12,6 +14,7 @@ def process(image_path):
         preds = preds[0]
         preds *= np.array([156/960,206/1280,156/960,206/1280])
         preds = preds.astype(int)
-        label.label(image_path,preds[0],preds[2],preds[1],preds[3],im_name=image_path.split('.')[0] + "_detected.jpeg")
+        label.label(pa,image_path,preds[0],preds[2],preds[1],preds[3],\
+                    im_name=image_path.split('.')[0] + "_detected.jpeg")
     
     
