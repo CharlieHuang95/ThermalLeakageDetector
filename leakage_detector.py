@@ -20,3 +20,5 @@ def process(image_path):
     return output_image_path
     
     
+if __name__=='__main__':
+    process("dataset/images/raw_images/img_thermal_1519937477416.jpg")
