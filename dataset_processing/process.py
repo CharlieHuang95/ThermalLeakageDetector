@@ -3,12 +3,14 @@ import cv2
 import numpy as np
 import os
 import pytesseract
+import parameters
+import helpers
 from PIL import Image
+from matplotlib import pyplot as plt
 
 # Import modules in the local directory
 from crop import crop_scale, crop_seek_logo, crop_location
 from resize import resize, is_landscape
-
 
 def string_to_int(string):
     for idx in range(len(string)):
@@ -16,8 +18,8 @@ def string_to_int(string):
             return int(string[:idx])
     return int(string)
 
-
 def main(args):
+    pa = parameters.Parameters()
     # Double check that the directory exists
     directory = args["input_path"]
     if not os.path.isdir(directory):
@@ -30,15 +32,10 @@ def main(args):
         full_path = os.path.join(directory, file_name)
         image = cv2.imread(full_path, 0)
         print("Processing", file_name)
+        #image = helpers.bilateral_filter(image,9,150,150)
         image_dict = {}
         if args["convert_to_temp"]:
-            image_dict["low"] = string_to_int(
-                pytesseract.image_to_string(
-                    Image.open(full_path).rotate(90, expand=True).crop((30, 0, 90, 30))))
-            image_dict["high"] = string_to_int(
-                pytesseract.image_to_string(
-                    Image.open(full_path).rotate(90, expand=True).crop((30, 1250, 90, 1280))))
-
+            image_dict["low"],image_dict["high"] = helpers.read_scale(image,pa)
         if args["filter_scale"]:
             # TODO(charlie): implement
             pass
@@ -59,12 +56,7 @@ def main(args):
 
         image = resize(image)
         if args["convert_to_temp"]:
-            temp_range = int(image_dict["high"] - image_dict["low"])
-            abs_image = np.zeros((len(image), len(image[0])))
-            for y in range(len(image)):
-                for x in range(len(image[0])):
-                    abs_image[y][x] = image[y][x] / 255.0 * temp_range \
-                                      + image_dict["low"]
+            abs_image = helpers.grayscale_to_temp(image,image_dict["low"],image_dict["high"])
             np.save(os.path.join(args["output_path"], file_name.split(".")[0]), abs_image)
         else:
             cv2.imwrite(os.path.join(args["output_path"], file_name), image)

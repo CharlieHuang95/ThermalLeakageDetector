@@ -1,5 +1,6 @@
 import os
-from bottle import route, request, static_file, run
+import leakage_detector
+from bottle import route, request, run, static_file
 
 @route('/upload', method='POST')
 def do_upload():
@@ -10,15 +11,21 @@ def do_upload():
     if ext not in ('.png', '.jpg', '.jpeg'):
         return "File extension not allowed."
 
-    save_path = "/tmp/{category}".format(category=category)
+    save_path = os.path.dirname(os.path.realpath(__file__)) + "/data/{category}".format(category=category)
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
     file_path = "{path}/{file}".format(path=save_path, file=upload.filename)
-    upload.save(file_path)
-    # CALL FUNCTION TO GENERATE RESULTS HERE, RETURN SOLUTION RECOMMENDATIONS
-    # AS JSON?
-    return "File successfully saved to '{0}'.".format(save_path)
+    upload.save(file_path, overwrite=True)
+    leakage_detector.process(file_path)
+    output_file_name = upload.filename.split('.')[0] + "_detected.jpeg"
+    static_path = "/static/data/{category}".format(category=category)
+    static_addr = "{path}/{file}".format(path=static_path, file=output_file_name)
+
+    print("File successfully saved to '{0}'.".format(save_path))
+    output = '<img src="' + static_addr + '">'
+    print("Accessing static address: " + output)
+    return output
 
 @route('/')
 def upload():
@@ -27,6 +34,17 @@ def upload():
                 Select a file: <input type="file" name="upload" />
                 <input type="submit" value="Upload" />
               </form>'''
+
+@route('/test')
+def test():
+    return '<img src="/static/denoised.jpg">'
+
+@route('/static/<filename:path>')
+def server_static(filename):
+    """Serves static files from project directory."""
+    root_path = os.path.dirname(os.path.realpath(__file__))
+    return static_file(filename, root=root_path)
+
 
 if __name__ == '__main__':
     run(host='localhost', port=8080)
