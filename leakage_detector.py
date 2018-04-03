@@ -16,7 +16,7 @@ def process(image_path):
         preds *= np.array([156/960,206/1280,156/960,206/1280])
         preds = preds.astype(int)
 
-        label.label(image_path,preds[0],preds[2],preds[1],preds[3],im_name=output_image_path)
+        label.label(pa,image_path,preds[0],preds[2],preds[1],preds[3],im_name=output_image_path)
     return output_image_path
     
     
