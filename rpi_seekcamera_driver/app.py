@@ -495,7 +495,8 @@ class App(Tkinter.Tk):
 
 # Convert to a PIL image sized to 640 x 480
         color = numpy.dstack((cred(noiselessI8).astype(noiselessI8.dtype), cgreen(noiselessI8).astype(noiselessI8.dtype), cblue(noiselessI8).astype(noiselessI8.dtype)))
-        imgCC = Image.fromarray(color).resize((640, 480),Image.ANTIALIAS).transpose(3)
+        #imgCC = Image.fromarray(color).resize((640, 480),Image.ANTIALIAS).transpose(3) # change image output
+        imgCC = Image.fromarray(color).resize((128, 96),Image.ANTIALIAS).transpose(3)
 
 # If user has clicked Snap! then save the rawCal, rawData, and colorized image
 # File names are hardcoded for now.
