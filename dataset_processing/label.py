@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from . import helpers
+from matplotlib import pyplot as plt
 
 def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,im_name="example.jpeg",image = None):
     #Door X,Y specify bounding box of door within the original image
@@ -37,18 +38,37 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,im_name="example.jpeg",image =
 
     #Get outline of leakage areas
     leaks = np.uint8(leaks*255)
-    borders = helpers.line_detector(leaks,2,4) 
-    door_ogrgb = cv2.cvtColor(door_og,cv2.COLOR_GRAY2BGR)
+    borders = helpers.line_detector(leaks,2,4)
+    og_rgb = cv2.cvtColor(downsized_og,cv2.COLOR_GRAY2BGR)
     
     x,y = np.where(borders)[1], np.where(borders)[0]
-    
-    for i in range(len(x)):
-        door_ogrgb[y,x] = (255,0,0)
+    og_rgb[y+doorY1,x+doorX1] = (0,0,255)
         
-    cv2.imwrite(im_name,door_ogrgb)
+    conv_mask = np.zeros((206,156))
+    for j in range(206):
+        for i in range(156):
+            conv_mask[j,i] = max(((103-j)/103)**2,((78-i)/78)**2)
+    conv_mask = helpers.resize(conv_mask,door_gs.shape[1],door_gs.shape[0])
     
     
-
+    convolution = np.sum(door_gs * helpers.bw(door_gs,th) * conv_mask)
+    summ = np.sum(door_gs * helpers.bw(door_gs,th))
+    
+    leak_type = "Poor Insulation"
+    
+    if convolution > 0.75 * summ:
+        leak_type = "Air Leak"
+    
+    top_ind = np.argmin(y)
+    
+    annotate_coordinates = (int(1280/206*(y[top_ind]+doorY1))+20,int(960/156*(x[top_ind]+doorX1)))
+    
+    og_rgb = helpers.resize(og_rgb,960,1280)
+    
+    cv2.putText(og_rgb,leak_type, annotate_coordinates,cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),3)
+    
+    
+    cv2.imwrite(im_name,og_rgb)
     
 if __name__ == '__main__':
     doorX1,doorX2 = 50,107

@@ -18,7 +18,6 @@ def process(image_path):
 
         label.label(pa,image_path,preds[0],preds[2],preds[1],preds[3],im_name=output_image_path)
     return output_image_path
-    
 
 if __name__ == "__main__":
     process("dataset/images/raw_images/img_thermal_1519937382264.jpg")
