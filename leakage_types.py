@@ -5,3 +5,4 @@ class LeakageTypes(object):
     AIR_LEAK_RIGHT = "Air leakage at right"
     POOR_INSULATION_SMALL = "Small area of poor insulation"
     POOR_INSULATION_LARGE = "Large area of poor insulation"
+    NONE = "No leakage detected"
