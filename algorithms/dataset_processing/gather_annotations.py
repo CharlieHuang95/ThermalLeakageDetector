@@ -102,10 +102,10 @@ def create_annotations(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--dataset",
-                        default="../dataset/images/processed_images/",
+                        default="dataset/images/processed_images/",
                         help="path to images dataset")
     parser.add_argument("-a", "--annotations",
-                        default="annotations/annotations",
+                        default="dataset/annotations/annotations",
                         help="path to save annotations")
     parser.add_argument("-r", "--redo",
                         action="store_true",
