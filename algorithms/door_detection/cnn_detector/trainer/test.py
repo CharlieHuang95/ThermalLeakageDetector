@@ -59,8 +59,12 @@ def get_results(args, H, data_dir):
             pred_confidences = graph.get_tensor_by_name('Reshape_2:0')
         else:
             new_saver.restore(sess, args.weights)
-            x_in = tf.get_collection('placeholders')[0]
-            pred_boxes, pred_confidences = tf.get_collection('vars')
+            print([n.name for n in tf.get_default_graph().as_graph_def().node])
+            x_in = tf.get_default_graph().get_tensor_by_name('Placeholder:0')
+            pred_boxes = tf.get_default_graph().get_tensor_by_name('decoder/prediction_output_shaped:0')
+            pred_confidences = tf.get_default_graph().get_tensor_by_name("decoder/confidence_output_shaped:0")
+            #x_in = tf.get_variable('Placeholder:0')#tf.get_collection('Placeholder:0')[0]
+            #pred_boxes, pred_confidences = tf.get_collection('vars')
             #freeze_graph.freeze_graph("overfeat.pb", "", False, args.weights, "add,Reshape_2", "save/restore_all",
              #"save/Const:0", "overfeat_frozen.pb", False, '') 
 
