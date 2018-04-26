@@ -52,8 +52,8 @@ import colorscale # used to colorize the image, be sure that colorscale.py is in
 from scipy.misc import toimage
 from scipy import ndimage
 import Tkinter
-
-
+import datetime
+import time
 
 class App(Tkinter.Tk):
     def __init__(self,parent):
@@ -269,22 +269,25 @@ class App(Tkinter.Tk):
 
 # Main program starts here (you can tell I'm new to Python ;)
     def initialize(self):
-        global dev, label, Label1, Label2, Label3, Label4, Label5, Label6
+        global dev, label, Label1, Label2, Label3, Label4, Label5, Label6, stop_frame
         global scl, scl1, scl2
         global calImage, calImagex, pal, snapshot
 
 # Default palette is "iron"
         pal = 'ironscale'
         snapshot = 0
+        stop_frame = False
 
 # Set up device
         dev = self.usbinit()
         self.camerainit(dev)
         self.grid()
 
+        button5 = Tkinter.Button(self,text=u"Snap",command=self.snap)
+        button5.grid(column=1, row=1)
 
 # set up the position of the image
-        label = Tkinter.Label(self,text="your image here", compound="top", height=240, width=400)
+        label = Tkinter.Label(self, compound="top", height=280, width=420)
         label.grid(column=0,row=1,columnspan=1,rowspan=1,sticky='EW')
         #label.grid(height=120, width=240)
         self.grid_columnconfigure(0,weight=1)
@@ -321,13 +324,14 @@ class App(Tkinter.Tk):
 
     def UpdateImage(self, delay, event=None):
         # this is merely so the display changes even though the image doesn't
-        global dev, status, calImage, ImageFinal, label
+        global dev, status, calImage, ImageFinal, label, stop_frame
         self.iteration += 1
 
-        self.image = self.get_image(dev)
-        ImageFinal = self.image
+        if (not stop_frame):
+            self.image = self.get_image(dev)
+            ImageFinal = self.image
 
-        label.configure(image=ImageFinal, text="Frames captured %s" % self.iteration)
+            label.configure(image=ImageFinal)
         # reschedule to run again in 1 ms
         self.after(delay, self.UpdateImage, 1)
 
@@ -381,7 +385,7 @@ class App(Tkinter.Tk):
 
 
     def get_image(self,dev):
-        global calImage, calImagex, status, scl, scl1, pal, snapshot
+        global calImage, calImagex, status, scl, scl1, pal, snapshot, stop_frame
 
         status = 0
 
@@ -496,19 +500,21 @@ class App(Tkinter.Tk):
 # Convert to a PIL image sized to 640 x 480
         color = numpy.dstack((cred(noiselessI8).astype(noiselessI8.dtype), cgreen(noiselessI8).astype(noiselessI8.dtype), cblue(noiselessI8).astype(noiselessI8.dtype)))
         #imgCC = Image.fromarray(color).resize((640, 480),Image.ANTIALIAS).transpose(3) # change image output
-        imgCC = Image.fromarray(color).resize((128, 96),Image.ANTIALIAS).transpose(3)
+        imgCC = Image.fromarray(color).resize((192, 144),Image.ANTIALIAS).transpose(3)
 
 # If user has clicked Snap! then save the rawCal, rawData, and colorized image
 # File names are hardcoded for now.
-        if snapshot == 1: 
-            im1arry = numpy.asarray(imgy)
-            im1arrz = numpy.asarray(calImagex)
-            jj = Image.fromarray(im1arry)
-            jj.save('data/rawData.png')
-            jj = Image.fromarray(im1arrz)
-            jj.save('data/rawCal.png')
-            imgCC.save('data/CImage.png')
+        if snapshot == 1:
+            st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')
+            filename = "data/" + st + "_img.png"
+            imgCC.save(filename)
             snapshot = 0
+            # Open the picture you took
+            img = Tkinter.PhotoImage(file=filename)
+            label.configure(image=img)
+            label.configure(text="the thermal image taken")
+            stop_frame = True
+
 
 # Then convert the colorized image to a PhotoImage which auto scales when displayed by Tkinter
         image = ImageTk.PhotoImage(imgCC)
