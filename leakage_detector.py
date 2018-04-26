@@ -1,4 +1,4 @@
-import door_detection.hog_door_detector.detector as door_detector
+import algorithms.door_detection.hog_door_detector.detector as door_detector
 import dataset_processing.label as label
 import numpy as np
 import cv2
