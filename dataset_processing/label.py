@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 from . import helpers
+from leakage_types import LeakageTypes
+
 from matplotlib import pyplot as plt
 
 def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,im_name="example.jpeg",image = None):
@@ -53,23 +55,22 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,im_name="example.jpeg",image =
     
     convolution = np.sum(door_gs * helpers.bw(door_gs,th) * conv_mask)
     summ = np.sum(door_gs * helpers.bw(door_gs,th))
-    
-    leak_type = "Poor Insulation"
+
+    # TODO: Modify this to reflect leakage type!!!
+    leak_type = LeakageTypes.POOR_INSULATION_LARGE
     
     if convolution > 0.75 * summ:
-        leak_type = "Air Leak"
+        # TODO: Modify this to reflect leakage type!!!
+        leak_type = LeakageTypes.AIR_LEAK_TOP
     
     top_ind = np.argmin(y)
-    
     annotate_coordinates = (int(1280/206*(y[top_ind]+doorY1))+20,int(960/156*(x[top_ind]+doorX1)))
-    
     og_rgb = helpers.resize(og_rgb,960,1280)
-    
+
     cv2.putText(og_rgb,leak_type, annotate_coordinates,cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),3)
-    
-    
     cv2.imwrite(im_name,og_rgb)
-    
+    return leak_type
+
 if __name__ == '__main__':
     doorX1,doorX2 = 50,107
     doorY1,doorY2 = 50,174
