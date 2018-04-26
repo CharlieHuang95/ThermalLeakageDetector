@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import pytesseract
+#import pytesseract
 from matplotlib import pyplot as plt
 
 def bw(image,th): #binary threshold an image
@@ -9,7 +9,7 @@ def bw(image,th): #binary threshold an image
     
 def bilateral_filter(im,d,sColor,sSpace):
     return cv2.bilateralFilter(im,d,sColor,sSpace)
-    
+"""
 def read_scale(im,pa):
     im_get_temp = bw(im,250) #Threshold black white makes pytesseract readings more accurate
     
@@ -33,7 +33,7 @@ def read_scale(im,pa):
             break
         
     return temp_low,temp_hi
-
+"""
 def grayscale_to_temp(im,low,hi):
     print (low,hi)
     return im.astype(float)/255*(hi-low) + low
