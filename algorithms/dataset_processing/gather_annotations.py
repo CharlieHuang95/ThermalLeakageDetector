@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import argparse
-from imutils.paths import list_images
 import os
 import pickle
 import json
@@ -83,8 +82,8 @@ def create_annotations(args):
     annotation_helper = AnnotationHelper(args["annotations"])
     annotation_helper.print()
     # Loop through each image and collect annotations
-    for image_path in list_images(args["dataset"]):
-        image_name = image_path.split("/")[-1].split("\\")[-1]
+    for image_name in os.listdir(args["dataset"]):
+        image_path = args["dataset"] + "/" + image_name
         if image_name in annotation_helper and not args["redo"]:
             continue
         # Load image and create a BoxSelector instance
