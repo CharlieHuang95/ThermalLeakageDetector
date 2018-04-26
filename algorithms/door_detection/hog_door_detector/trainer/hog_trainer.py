@@ -65,8 +65,10 @@ class HOGTrainer(object):
                 diff[3] /= float(height)
                 difference_array.append(diff)
                 pred = list(map(int, pred))
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 cv2.rectangle(image, (pred[0], pred[2]), (pred[1], pred[3]), (255, 0, 0))
                 cv2.rectangle(image, (gt[0], gt[2]), (gt[1], gt[3]), (0, 255, 0))
+
                 cv2.imwrite("eval/" + str(total) + ".jpg", image)
         difference_array = np.array(difference_array)
 
