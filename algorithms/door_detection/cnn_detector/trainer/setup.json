@@ -1,7 +1,7 @@
 {
     "data": {
-        "train_idl": "../../../dataset_processing/dataset/images/processed_images/train.json",
-        "test_idl": "../../../dataset_processing/dataset/images/processed_images/test.json",
+        "train_idl": "../../../dataset/images/processed_images/train.json",
+        "test_idl": "../../../dataset/images/processed_images/test.json",
         "truncate_data": false
     },
     "logging": {

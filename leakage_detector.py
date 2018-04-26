@@ -6,6 +6,7 @@ import os
 import dataset_processing.parameters as parameters
 from object_types import ObjectTypes
 
+
 os_path = os.path.dirname(os.path.realpath(__file__))
 HOG = door_detector.HOGDetector(os_path + "/algorithms/door_detection/hog_door_detector/model")
 pa = parameters.Parameters()

@@ -185,15 +185,13 @@ def build_forward(H, x, phase, reuse):
             pred_logits.append(tf.reshape(tf.matmul(output, conf_weights),
                                          [int(outer_size), 1, int(H['num_classes'])]))
 
-        pred_boxes = tf_concat(1, pred_boxes, name="prediction_output")
+        pred_boxes = tf_concat(1, pred_boxes)
         pred_logits = tf_concat(1, pred_logits)
         pred_logits_squash = tf.reshape(pred_logits,
-                                        [int(outer_size * H['rnn_len']), int(H['num_classes'])],
-                                        name="prediction_output_shaped")
+                                        [int(outer_size * H['rnn_len']), int(H['num_classes'])])
         pred_confidences_squash = tf.nn.softmax(pred_logits_squash)
         pred_confidences = tf.reshape(pred_confidences_squash,
-                                      [int(outer_size), int(H['rnn_len']), int(H['num_classes'])],
-                                       name="confidence_output_shaped")
+                                      [int(outer_size), int(H['rnn_len']), int(H['num_classes'])])
 
         if H['use_rezoom']:
             pred_confs_deltas = []
