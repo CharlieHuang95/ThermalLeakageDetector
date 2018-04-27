@@ -3,7 +3,7 @@ import numpy as np
 from . import helpers
 import leak
 
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image = None):
     color_cycle = 0
@@ -48,7 +48,19 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
     
     img_groups,num_groups,leak_classes = leak.group_leaks(leaks,min_leak_size)
     
-    #if num_groups is 1
+    if len(leak_classes) > 0:
+        leak.validate_leaks(leak_classes,door_gs)
+    
+    # if no regions are labeled
+    if len(leak_classes) == 0:
+        og_rgb = cv2.cvtColor(downsized_og,cv2.COLOR_GRAY2BGR)
+        og_rgb = helpers.resize(og_rgb,960,1280)
+        
+        cv2.rectangle(og_rgb,(int(doorX1*960/156),int(doorY1*1280/206)),\
+              (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[5])
+        cv2.putText(og_rgb,"No problems detected", (180,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),4)
+        cv2.imwrite(outpath,og_rgb)
+        return ["No error"]
     
     img_groups = (img_groups/num_groups*255).astype(int)
 
@@ -60,7 +72,7 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
             conv_mask[j,i] = max(((103-j)/103)**2,((78-i)/78)**2)
     conv_mask = helpers.resize(conv_mask,door_gs.shape[1],door_gs.shape[0])
     
-    plt.imshow(img_groups,cmap='gray')
+    #plt.imshow(img_groups,cmap='gray')
     for lk in leak_classes:
         plt.imshow(lk.bw_img,cmap='gray')
         borders = helpers.outline_leak(lk.bw_img,2,4)
@@ -72,7 +84,7 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
         
         color_cycle+=1
         
-    plt.imshow(og_rgb)
+    #plt.imshow(og_rgb)
 
     og_rgb = helpers.resize(og_rgb,960,1280)
 
@@ -86,7 +98,7 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
         color_cycle += 1
         
     cv2.rectangle(og_rgb,(int(doorX1*960/156),int(doorY1*1280/206)),\
-                  (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[color_cycle])
+                  (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[5])
     
     #plt.imshow(og_rgb)    
     

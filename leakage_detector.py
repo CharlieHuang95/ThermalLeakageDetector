@@ -52,4 +52,8 @@ def process_folder(folder_path):
         #cv2.imwrite(folder_path+'/../processed_images/'+filename[2:-1],p)
 
 if __name__ == "__main__":
-    process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520017052918.jpg")
+    pass
+    #process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520017052918.jpg")
+    #process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520032189407.jpg")
+    #process_folder("/algorithms/dataset_processing/dataset/images/raw_images")
+    

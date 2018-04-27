@@ -38,7 +38,7 @@ class AnnotationHelper(object):
         pickle.dump(self.annotations, f, 2)
         f.close()
 
-    def print(self):
+    def print_annotation(self):
         if self.annotations is not None:
             print(self.annotations)
 
@@ -80,7 +80,7 @@ class AnnotationHelper(object):
 def create_annotations(args):
     print("Press: 'q' to quit, 'n' to skip, '1-9' to label it of that class, '<Enter>' to move on.")
     annotation_helper = AnnotationHelper(args["annotations"])
-    annotation_helper.print()
+    annotation_helper.print_annotation()
     # Loop through each image and collect annotations
     for image_name in os.listdir(args["dataset"]):
         image_path = args["dataset"] + "/" + image_name
