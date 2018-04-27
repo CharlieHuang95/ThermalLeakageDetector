@@ -138,7 +138,7 @@ def add_rectangles(H, orig_image, confidences, boxes, use_stitching=False, rnn_l
                 all_rects[y][x].append(Rect(abs_cx,abs_cy,w,h,conf))
 
     all_rects_r = [r for row in all_rects for cell in row for r in cell]
-    if False:#use_stitching:
+    if True:#use_stitching:
         from stitch_wrapper import stitch_rects
         acc_rects = stitch_rects(all_rects, tau)
     else:
