@@ -3,7 +3,7 @@ import numpy as np
 from . import helpers
 from leakage_types import LeakageTypes
 
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,im_name="example.jpeg",image = None):
     #Door X,Y specify bounding box of door within the original image

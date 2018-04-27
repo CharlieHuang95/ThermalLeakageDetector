@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 #import pytesseract
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 def bw(image,th): #binary threshold an image
     bw_im = image>th

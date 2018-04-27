@@ -66,41 +66,41 @@ class App(Tkinter.Tk):
 
     def usbinit(self):
 # find our Seek Thermal device  289d:0010
-	dev = usb.core.find(idVendor=0x289d, idProduct=0x0010)
+        dev = usb.core.find(idVendor=0x289d, idProduct=0x0010)
 
 # was it found?
-	if dev is None:
-    	    raise ValueError('Device not found')
+        if dev is None:
+            raise ValueError('Device not found')
 
 # set the active configuration. With no arguments, the first
 # configuration will be the active one
-	dev.set_configuration()
+        dev.set_configuration()
 
 # get an endpoint instance
-	cfg = dev.get_active_configuration()
-	intf = cfg[(0,0)]
+        cfg = dev.get_active_configuration()
+        intf = cfg[(0,0)]
 
-	ep = usb.util.find_descriptor(
-	    intf,
+        ep = usb.util.find_descriptor(
+            intf,
     # match the first OUT endpoint
-    	    custom_match = \
-    	    lambda e: \
-		usb.util.endpoint_direction(e.bEndpointAddress) == \
-    		usb.util.ENDPOINT_OUT)
+            custom_match = \
+            lambda e: \
+                usb.util.endpoint_direction(e.bEndpointAddress) == \
+                usb.util.ENDPOINT_OUT)
 
-	assert ep is not None
+        assert ep is not None
 
-	return dev
+        return dev
 
 # send_msg sends a message that does not need or get an answer
     def send_msg(self,dev,bmRequestType, bRequest, wValue=0, wIndex=0, data_or_wLength=None, timeout=None):
-	assert (dev.ctrl_transfer(bmRequestType, bRequest, wValue, wIndex, data_or_wLength, timeout) == len(data_or_wLength))
+        assert (dev.ctrl_transfer(bmRequestType, bRequest, wValue, wIndex, data_or_wLength, timeout) == len(data_or_wLength))
 
 # alias method to make code easier to read
 # receive msg actually sends a message as well.
     def receive_msg(self,dev,bmRequestType, bRequest, wValue=0, wIndex=0, data_or_wLength=None, timeout=None):
-	zz = dev.ctrl_transfer(bmRequestType, bRequest, wValue, wIndex, data_or_wLength, timeout) # == len(data_or_wLength))
-	return zz
+        zz = dev.ctrl_transfer(bmRequestType, bRequest, wValue, wIndex, data_or_wLength, timeout) # == len(data_or_wLength))
+        return zz
 
 # Documentation on the init sequence starts here
 
@@ -162,58 +162,58 @@ class App(Tkinter.Tk):
 
 # De-init the device
     def deinit(self,dev):
-	msg = '\x00\x00'
+        msg = '\x00\x00'
         for i in range(3):
-	    self.send_msg(dev,0x41, 0x3C, 0, 0, msg)           # 0x3c = 60  Set Operation Mode 0x0000 (Sleep)
+            self.send_msg(dev,0x41, 0x3C, 0, 0, msg)           # 0x3c = 60  Set Operation Mode 0x0000 (Sleep)
 
 # Camera initilization
     def camerainit(self,dev):
 
-	try:
-	    msg = '\x01'
-	    self.send_msg(dev,0x41, 0x54, 0, 0, msg)              # 0x54 = 84 Target Platform 0x01 = Android
-	except Exception as e:
-	    self.deinit(dev)
-	    msg = '\x01'
-	    self.send_msg(dev,0x41, 0x54, 0, 0, msg)              # 0x54 = 84 Target Platform 0x01 = Android
+        try:
+            msg = '\x01'
+            self.send_msg(dev,0x41, 0x54, 0, 0, msg)              # 0x54 = 84 Target Platform 0x01 = Android
+        except Exception as e:
+            self.deinit(dev)
+            msg = '\x01'
+            self.send_msg(dev,0x41, 0x54, 0, 0, msg)              # 0x54 = 84 Target Platform 0x01 = Android
 
-	self.send_msg(dev,0x41, 0x3C, 0, 0, '\x00\x00')              # 0x3c = 60 Set operation mode    0x0000  (Sleep)
-	ret1 = self.receive_msg(dev,0xC1, 0x4E, 0, 0, 4)             # 0x4E = 78 Get Firmware Info
+        self.send_msg(dev,0x41, 0x3C, 0, 0, '\x00\x00')              # 0x3c = 60 Set operation mode    0x0000  (Sleep)
+        ret1 = self.receive_msg(dev,0xC1, 0x4E, 0, 0, 4)             # 0x4E = 78 Get Firmware Info
 #print ret1
 #array('B', [1, 3, 0, 0])
 
-	ret2 = self.receive_msg(dev,0xC1, 0x36, 0, 0, 12)            # 0x36 = 54 Read Chip ID
+        ret2 = self.receive_msg(dev,0xC1, 0x36, 0, 0, 12)            # 0x36 = 54 Read Chip ID
 #print ret2
 #array('B', [20, 0, 12, 0, 86, 0, 248, 0, 199, 0, 69, 0])
 
-	self.send_msg(dev,0x41, 0x56, 0, 0, '\x20\x00\x30\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features
-	ret3 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x40)                              # 0x58 = 88 Get Factory Settings
+        self.send_msg(dev,0x41, 0x56, 0, 0, '\x20\x00\x30\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features
+        ret3 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x40)                              # 0x58 = 88 Get Factory Settings
 #print ret3
 #array('B', [2, 0, 0, 0, 0, 112, 91, 69, 0, 0, 140, 65, 0, 0, 192, 65, 79, 30, 86, 62, 160, 137, 64, 63, 234, 149, 178, 60, 0, 0, 0, 0, 0, 0, 0, 0, 72, 97, 41, 66, 124, 13, 1, 61, 206, 70, 240, 181, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 66, 0, 0, 2, 67])
 
-	self.send_msg(dev,0x41, 0x56, 0, 0, '\x20\x00\x50\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features
-	ret4 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x40)                              # 0x58 = 88 Get Factory Settings
+        self.send_msg(dev,0x41, 0x56, 0, 0, '\x20\x00\x50\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features
+        ret4 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x40)                              # 0x58 = 88 Get Factory Settings
 #print ret4
 #array('B', [0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 161, 248, 65, 63, 40, 127, 119, 60, 44, 101, 55, 193, 240, 133, 129, 63, 244, 253, 96, 66, 40, 15, 155, 63, 43, 127, 103, 186, 9, 144, 186, 52, 0, 0, 0, 0, 0, 0, 2, 67, 0, 0, 150, 67, 0, 0, 0, 0])
 
-	self.send_msg(dev,0x41, 0x56, 0, 0, '\x0C\x00\x70\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features
-	ret5 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x18)                              # 0x58 = 88 Get Factory Settings
+        self.send_msg(dev,0x41, 0x56, 0, 0, '\x0C\x00\x70\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features
+        ret5 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x18)                              # 0x58 = 88 Get Factory Settings
 #print ret5
 #array('B', [0, 0, 0, 0, 255, 255, 255, 255, 190, 193, 249, 65, 205, 204, 250, 65, 48, 42, 177, 191, 200, 152, 147, 63])
 
-	self.send_msg(dev,0x41, 0x56, 0, 0, '\x06\x00\x08\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features   
-	ret6 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x0C)                              # 0x58 = 88 Get Factory Settings
+        self.send_msg(dev,0x41, 0x56, 0, 0, '\x06\x00\x08\x00\x00\x00')                  # 0x56 = 86 Set Factory Settings Features   
+        ret6 = self.receive_msg(dev,0xC1, 0x58, 0, 0, 0x0C)                              # 0x58 = 88 Get Factory Settings
 #print ret6
 #array('B', [49, 52, 48, 99, 49, 48, 69, 52, 50, 78, 55, 49])
 
-	self.send_msg(dev,0x41, 0x3E, 0, 0, '\x08\x00')                                  # 0x3E = 62 Set Image Processing Mode 0x0008
-	ret7 = self.receive_msg(dev,0xC1, 0x3D, 0, 0, 2)                                 # 0x3D = 61 Get Operation Mode
+        self.send_msg(dev,0x41, 0x3E, 0, 0, '\x08\x00')                                  # 0x3E = 62 Set Image Processing Mode 0x0008
+        ret7 = self.receive_msg(dev,0xC1, 0x3D, 0, 0, 2)                                 # 0x3D = 61 Get Operation Mode
 #print ret7
 #array('B', [0, 0])
 
-	self.send_msg(dev,0x41, 0x3E, 0, 0, '\x08\x00')                                  # 0x3E = 62 Set Image Processing Mode  0x0008
-	self.send_msg(dev,0x41, 0x3C, 0, 0, '\x01\x00')                                  # 0x3c = 60 Set Operation Mode         0x0001  (Run)
-	ret8 = self.receive_msg(dev,0xC1, 0x3D, 0, 0, 2)                                 # 0x3D = 61 Get Operation Mode
+        self.send_msg(dev,0x41, 0x3E, 0, 0, '\x08\x00')                                  # 0x3E = 62 Set Image Processing Mode  0x0008
+        self.send_msg(dev,0x41, 0x3C, 0, 0, '\x01\x00')                                  # 0x3c = 60 Set Operation Mode         0x0001  (Run)
+        ret8 = self.receive_msg(dev,0xC1, 0x3D, 0, 0, 2)                                 # 0x3D = 61 Get Operation Mode
 #print ret8
 #array('B', [1, 0])
 
@@ -231,37 +231,37 @@ class App(Tkinter.Tk):
         for i in range(0,155,1):
             for j in range(k,206,15):
 #                print i,j
-		    dotsI[i,j] = 255
-		    k = k - 4
-    	    if k < 0: k = k + 15
+                    dotsI[i,j] = 255
+                    k = k - 4
+            if k < 0: k = k + 15
 
-	return dotsI
+        return dotsI
 # display it to see if it matches the Seek black dot hex pattern
 
-#	zz = Image.fromstring("I", (208,156), dotsI, "raw", "I;8")
-#	toimage(zz).show()
+#       zz = Image.fromstring("I", (208,156), dotsI, "raw", "I;8")
+#       toimage(zz).show()
 #        print dotsI
 #####################################################################
 
 
     def printIMG(self,img):
-	global Label1, Label2
-	j = img.min()
-	k = img.max()
+        global Label1, Label2
+        j = img.min()
+        k = img.max()
         Label1.configure( text="Img min %d" % j)
         Label2.configure( text="Img max %d" % k)
 
     def printCAL(self,cal):
-	global Label3, Label4
-	j = cal.min()
-	k = cal.max()
+        global Label3, Label4
+        j = cal.min()
+        k = cal.max()
         Label3.configure( text="Cal min %d" % j)
         Label4.configure( text="Cal max %d" % k)
 
     def printSUM(self,add):
-	global Label5, Label6
-	j = add.min()
-	k = add.max()
+        global Label5, Label6
+        j = add.min()
+        k = add.max()
         Label5.configure( text="Sum min %d" % j)
         Label6.configure( text="Sum max %d" % k)
 
@@ -277,72 +277,72 @@ class App(Tkinter.Tk):
         except usb.USBError as e:
             sys.exit()
 
-	return data
+        return data
 
 ###################################
 
     def add_207(self,imgF):  # Add (really subtract) the data from the 207 row to each pixil
-	global scl2
+        global scl2
 # or not depending on the testing some of the following may be commented out.
 # there are a different # of black dots in each row so the divisor
 # needs to change for each row according to what is in the dot_numbers.txt file.
 # this may not be the best way to do this. The code below does not do this now.
 # need to try to use numpy or scipy to do this as it is a real hit on cpu useage.
 # But doing it only for the cal image doesn't impact the real time images.
-	tuning = scl2.get() / 150.0
+        tuning = scl2.get() / 150.0
 
-	z = (.002 * imgF[:,206].mean())
-	z1 = z * tuning
-#	print tuning
-#	maxTune = ( imgF[:,206].max())
-#	minTune = ( imgF[:,206].min())
+        z = (.002 * imgF[:,206].mean())
+        z1 = z * tuning
+#       print tuning
+#       maxTune = ( imgF[:,206].max())
+#       minTune = ( imgF[:,206].min())
 
-	for i in range(0,156,1):
-	    for j in range(0,205,1):
-		    imgF[i,j] = imgF[i,j] - (.05 * imgF[i,j]/z) - imgF[i,206]/z1 # try scaled pixil and scaled pixil 207
-#		    imgF[i,j] = imgF[i,j]
-	return
+        for i in range(0,156,1):
+            for j in range(0,205,1):
+                    imgF[i,j] = imgF[i,j] - (.05 * imgF[i,j]/z) - imgF[i,206]/z1 # try scaled pixil and scaled pixil 207
+#                   imgF[i,j] = imgF[i,j]
+        return
 
-#	for i in range(0,156,1):
-#	    for j in range(0,205,1):
-#		    imgF[i,j] = imgF[i,j] - (.05 * imgF[i,j]/z) - imgF[i,206]/z # try scaled pixil and scaled pixil 207
-#	return
+#       for i in range(0,156,1):
+#           for j in range(0,205,1):
+#                   imgF[i,j] = imgF[i,j] - (.05 * imgF[i,j]/z) - imgF[i,206]/z # try scaled pixil and scaled pixil 207
+#       return
 
 ####################################
 
     def pal1(self):
-	global pal
-	pal = 'ironscale'
+        global pal
+        pal = 'ironscale'
     def pal2(self):
-	global pal
-	pal = 'whitehotscale'
+        global pal
+        pal = 'whitehotscale'
     def pal3(self):
-	global pal
-	pal = 'blackhotscale'
+        global pal
+        pal = 'blackhotscale'
     def pal4(self):
-	global pal
-	pal = 'greenredscale'
+        global pal
+        pal = 'greenredscale'
     def snap(self):
-	global snapshot
-	snapshot = 1
+        global snapshot
+        snapshot = 1
 
 
 # Main program starts here (you can tell I'm new to Python ;)
     def initialize(self):
 
-	global dev, label, Label1, Label2, Label3, Label4, Label5, Label6
-	global scl, scl1, scl2
-	global calImage, calImagex, pal, snapshot
+        global dev, label, Label1, Label2, Label3, Label4, Label5, Label6
+        global scl, scl1, scl2
+        global calImage, calImagex, pal, snapshot
 
 # Default palette is "iron"
-	pal = 'gray1scale'
-	snapshot = 0
+        pal = 'gray1scale'
+        snapshot = 0
 
 # Set up device
-	dev = self.usbinit()
-	self.camerainit(dev)
+        dev = self.usbinit()
+        self.camerainit(dev)
 
-	self.grid()
+        self.grid()
 
 # Buttons for changing palettes
         button1 = Tkinter.Button(self,text=u"Iron",command=self.pal1)
@@ -357,50 +357,50 @@ class App(Tkinter.Tk):
         button5.grid(row=4,column=5)
 
 # Set up the label positions for the img, cal and sum data
-	Label1 = Tkinter.Label(self,text="Label1")
-	Label2 = Tkinter.Label(self,text="Label2")
-	Label3 = Tkinter.Label(self,text="Label3")
-	Label4 = Tkinter.Label(self,text="Label4")
-	Label5 = Tkinter.Label(self,text="Label5")
-	Label6 = Tkinter.Label(self,text="Label6")
+        Label1 = Tkinter.Label(self,text="Label1")
+        Label2 = Tkinter.Label(self,text="Label2")
+        Label3 = Tkinter.Label(self,text="Label3")
+        Label4 = Tkinter.Label(self,text="Label4")
+        Label5 = Tkinter.Label(self,text="Label5")
+        Label6 = Tkinter.Label(self,text="Label6")
 
-	Label1.grid(row=4,column=0,sticky='W') # img min
-	Label2.grid(row=5,column=0,sticky='W') # img max
-	Label3.grid(row=4,column=1,sticky='W') # cal min
-	Label4.grid(row=5,column=1,sticky='W') # cal max
-	Label5.grid(row=4,column=2,sticky='E') # sum min
-	Label6.grid(row=5,column=2,sticky='E') # sum max
+        Label1.grid(row=4,column=0,sticky='W') # img min
+        Label2.grid(row=5,column=0,sticky='W') # img max
+        Label3.grid(row=4,column=1,sticky='W') # cal min
+        Label4.grid(row=5,column=1,sticky='W') # cal max
+        Label5.grid(row=4,column=2,sticky='E') # sum min
+        Label6.grid(row=5,column=2,sticky='E') # sum max
 
 # set up the position of the image
         label = Tkinter.Label(self,text="your image here", compound="top")
 
-	label.grid(column=0,row=1,columnspan=3,rowspan=3,sticky='EW')
-	self.grid_columnconfigure(0,weight=1)
-	self.resizable(True,True)
+        label.grid(column=0,row=1,columnspan=3,rowspan=3,sticky='EW')
+        self.grid_columnconfigure(0,weight=1)
+        self.resizable(True,True)
 
 # set up the position of the 2 sliders for the top & bottom ranges
-	scl = Tkinter.Scale(self, from_=0, to=255, length=200, orient=Tkinter.HORIZONTAL, label='Bottom Range')
-	scl.set(0)
-	scl.grid(row = 0, column=0,sticky='W')
+        scl = Tkinter.Scale(self, from_=0, to=255, length=200, orient=Tkinter.HORIZONTAL, label='Bottom Range')
+        scl.set(0)
+        scl.grid(row = 0, column=0,sticky='W')
 
-	scl1 = Tkinter.Scale(self, from_=0, to=255,length=200, orient=Tkinter.HORIZONTAL, label='Top Range')
-	scl1.set(64)
-	scl1.grid(row = 0, column=2)
+        scl1 = Tkinter.Scale(self, from_=0, to=255,length=200, orient=Tkinter.HORIZONTAL, label='Top Range')
+        scl1.set(64)
+        scl1.grid(row = 0, column=2)
 
-	scl2 = Tkinter.Scale(self, from_=100, to=300,length=200, orient=Tkinter.HORIZONTAL, label='Tuning')
-	scl2.set(200)
-	scl2.grid(row = 0, column=1)
+        scl2 = Tkinter.Scale(self, from_=100, to=300,length=200, orient=Tkinter.HORIZONTAL, label='Tuning')
+        scl2.set(200)
+        scl2.grid(row = 0, column=1)
 
 # start iteration (or frame) count to 0
 # this is printed out on the GUI so you can get a feel for how fast the program is running.
 # maybe should implemt an FPS function like Fry-Kun did.
-	self.iteration=0
+        self.iteration=0
 
 # get a cal image so the data isn't null if/when we miss the first one
         self.get_cal_image(dev)
 
 # update the image after 10 ms wait
-	self.UpdateImage(10)
+        self.UpdateImage(10)
 
 # End of the initilization routine
 
@@ -409,11 +409,11 @@ class App(Tkinter.Tk):
 
     def UpdateImage(self, delay, event=None):
         # this is merely so the display changes even though the image doesn't
-	global dev, status, calImage, ImageFinal, label
+        global dev, status, calImage, ImageFinal, label
         self.iteration += 1
 
         self.image = self.get_image(dev)
-	ImageFinal = self.image
+        ImageFinal = self.image
 
         label.configure(image=ImageFinal, text="Frames captured %s" % self.iteration)
         # reschedule to run again in 1 ms
@@ -424,21 +424,21 @@ class App(Tkinter.Tk):
     def get_cal_image(self,dev):
 # Get the first cal image so calImage isn't null
 
-	global status, calImage, calImagex
-	status = 0
+        global status, calImage, calImagex
+        status = 0
 
 #  Wait for the cal frame
 
-	while status != 1:
+        while status != 1:
 #  1 is a Calibration frame
 
 # Read a raw frame
-	   ret9 = self.read_frame(dev)
+           ret9 = self.read_frame(dev)
 
-	   status = ret9[20]
+           status = ret9[20]
 
-	   status1 = ret9[80]
-#	   print (status , status1)
+           status1 = ret9[80]
+#          print (status , status1)
 
 
 #  6 is a pre-calibration frame (whatever that means)
@@ -449,156 +449,156 @@ class App(Tkinter.Tk):
 
 #  Convert the raw 16 bit calibration data to a PIL Image
 
-	calimgI = Image.frombytes("F", (208,156), ret9, "raw", "F;16")
+        calimgI = Image.frombytes("F", (208,156), ret9, "raw", "F;16")
 
 # save 16bit cal image for later
-	calImagex = Image.frombytes("I", (208,156), ret9, "raw", "I;16")
+        calImagex = Image.frombytes("I", (208,156), ret9, "raw", "I;16")
 
 #  Convert the PIL Image to an unsigned numpy float array
 
-	im2arr = numpy.asarray(calimgI)
+        im2arr = numpy.asarray(calimgI)
 
 # clamp values < 2000 to 2000
 
-	im2arr = numpy.where(im2arr < 2000, 2000, im2arr)
+        im2arr = numpy.where(im2arr < 2000, 2000, im2arr)
 
-	im2arrF = im2arr.astype('float')
-	calImage = im2arrF
+        im2arrF = im2arr.astype('float')
+        calImage = im2arrF
 
-	return
+        return
 
 
     def get_image(self,dev):
-	global calImage, calImagex, status, scl, scl1, pal, snapshot
+        global calImage, calImagex, status, scl, scl1, pal, snapshot
 
-	status = 0
+        status = 0
 
 #  Wait for the next image frame, ID = 3 is a Normal frame
-	while status != 3:
+        while status != 3:
 
 
 # Read a raw frame
-	   ret9 = self.read_frame(dev)
+           ret9 = self.read_frame(dev)
 
-	   status = ret9[20]
+           status = ret9[20]
 
 
 # check for a new cal frame, if so update the cal image
-	   if status == 1:
+           if status == 1:
 
 #  Convert the raw 16 bit calibration data to a PIL Image
-		calimgI = Image.frombytes("F", (208,156), ret9, "raw", "F;16")
+                calimgI = Image.frombytes("F", (208,156), ret9, "raw", "F;16")
 
 # save cal 16bit image for later
-		calImagex = Image.frombytes("I", (208,156), ret9, "raw", "I;16")
+                calImagex = Image.frombytes("I", (208,156), ret9, "raw", "I;16")
 
 #  Convert the PIL Image to an unsigned numpy float array
-		im2arr = numpy.asarray(calimgI)
+                im2arr = numpy.asarray(calimgI)
 
 # Pixel 40 is a counter of some sort that starts at 0 and increments to 65535
 # maybe an internal frame counter or clock.
-		status1 = im2arr[0,40]
+                status1 = im2arr[0,40]
 
 # clamp values < 2000 to 2000
-		im2arr = numpy.where(im2arr < 2000, 2000, im2arr)
-		im2arrF = im2arr.astype('float')
+                im2arr = numpy.where(im2arr < 2000, 2000, im2arr)
+                im2arrF = im2arr.astype('float')
 
 # Clamp pixel 40 to 2000 so it doesn't cause havoc as it rises to 65535
-	        im2arrF[0,40] = 2000
+                im2arrF[0,40] = 2000
 
 # Add the row 207 correction (maybe) >>Looks like it needs to be applied to just the cal frame<<
-		self.add_207(im2arrF)
+                self.add_207(im2arrF)
 
 # Zero out column 207
-		im2arrF[:,206] = numpy.zeros(156)
+                im2arrF[:,206] = numpy.zeros(156)
 
 #  Print the min max values for the calimage
-		self.printCAL(im2arrF)
+                self.printCAL(im2arrF)
 
 #  Save the calibration image
-		calImage = im2arrF
+                calImage = im2arrF
 
 #  If this is normal image data
 #  Convert the raw 16 bit thermal data to a PIL Image
-	imgx = Image.frombytes("F", (208,156), ret9, "raw", "F;16")
-	imgy = Image.frombytes("I", (208,156), ret9, "raw", "I;16")
+        imgx = Image.frombytes("F", (208,156), ret9, "raw", "F;16")
+        imgy = Image.frombytes("I", (208,156), ret9, "raw", "I;16")
 
 #  Convert the PIL Image to an unsigned numpy float array
-	im1arr = numpy.asarray(imgx)
+        im1arr = numpy.asarray(imgx)
 
 # Pixel 40 is a counter of some sort that starts at 0 and increments to 65535
 # maybe an internal frame counter or clock.
-#	status1 = im1arr[0,40]
+#       status1 = im1arr[0,40]
 
 # clamp values < 2000 to 2000
-	im1arr = numpy.where(im1arr < 2000, 2000, im1arr)
-	im1arrF = im1arr.astype('float')
+        im1arr = numpy.where(im1arr < 2000, 2000, im1arr)
+        im1arrF = im1arr.astype('float')
 
 # Clamp pixel 40 to 2000 so it doesn't cause havoc as it rises to 65535
-	im1arrF[0,40]  = 2000
+        im1arrF[0,40]  = 2000
 
 # Zero out column 207
-	im1arrF[:,206] = numpy.zeros(156)
+        im1arrF[:,206] = numpy.zeros(156)
 
 #  Print the min max values for the image
-	self.printIMG(im1arrF)
+        self.printIMG(im1arrF)
 
 #  Subtract the most recent calibration image from the offset image data
 #  With both the cal and image as floats, the offset doesn't matter and
 #  the following image conversion scales the result to display properly
-	additionF = (im1arrF) + 600 - (calImage)
+        additionF = (im1arrF) + 600 - (calImage)
 
 #  Try removing noise from the image, this works suprisingly well, but takes some cpu time
 #  It gets rid of bad pixels as well as the "Patent Pixils"
-	noiselessF = ndimage.median_filter(additionF, 3)
+        noiselessF = ndimage.median_filter(additionF, 3)
 
 # don't bother to zero out column 207 as it contains no data
 # can't see any difference on the image anyway.
-#	noiselessF[:,206] = numpy.zeros(156)
+#       noiselessF[:,206] = numpy.zeros(156)
 
 #  Print the min max values for the calibrated/noise filtered image
-	self.printSUM(noiselessF)
+        self.printSUM(noiselessF)
 
 
 # This will colorize the image, it works but it is a cpu hog
 
-	bottom = scl.get()
-	top = scl1.get()
+        bottom = scl.get()
+        top = scl1.get()
 
-	display_min = bottom * 4
-	display_max = top * 16
-	image8 = noiselessF
+        display_min = bottom * 4
+        display_max = top * 16
+        image8 = noiselessF
 
         image8.clip(display_min, display_max, out=image8)
         image8 -= display_min
-	image8 //= (display_max - display_min + 1) / 256.
+        image8 //= (display_max - display_min + 1) / 256.
         image8 = image8.astype(numpy.uint8)
 
-	noiselessI8= image8
+        noiselessI8= image8
 
-	conv = colorscale.GrayToRGB(palettes[pal])
-	cred = numpy.frompyfunc(conv.get_red, 1, 1)
-	cgreen = numpy.frompyfunc(conv.get_green, 1, 1)
-	cblue = numpy.frompyfunc(conv.get_blue, 1, 1)
+        conv = colorscale.GrayToRGB(palettes[pal])
+        cred = numpy.frompyfunc(conv.get_red, 1, 1)
+        cgreen = numpy.frompyfunc(conv.get_green, 1, 1)
+        cblue = numpy.frompyfunc(conv.get_blue, 1, 1)
 
 # Convert to a PIL image sized to 640 x 480
-	color = numpy.dstack((cred(noiselessI8).astype(noiselessI8.dtype), cgreen(noiselessI8).astype(noiselessI8.dtype), cblue(noiselessI8).astype(noiselessI8.dtype)))
-	imgCC = Image.fromarray(color).resize((640, 480),Image.ANTIALIAS).transpose(3)
+        color = numpy.dstack((cred(noiselessI8).astype(noiselessI8.dtype), cgreen(noiselessI8).astype(noiselessI8.dtype), cblue(noiselessI8).astype(noiselessI8.dtype)))
+        imgCC = Image.fromarray(color).resize((640, 480),Image.ANTIALIAS).transpose(3)
 
 # If user has clicked Snap! then save the rawCal, rawData, and colorized image
 # File names are hardcoded for now.
-	if snapshot == 1: 
-	    im1arry = numpy.asarray(imgy)
-	    im1arrz = numpy.asarray(calImagex)
-	    jj = Image.fromarray(im1arry)
-	    jj.save('data/rawData.png')
-	    jj = Image.fromarray(im1arrz)
-	    jj.save('data/rawCal.png')
-	    imgCC.save('data/CImage.png')
-	    snapshot = 0
+        if snapshot == 1: 
+            im1arry = numpy.asarray(imgy)
+            im1arrz = numpy.asarray(calImagex)
+            jj = Image.fromarray(im1arry)
+            jj.save('data/rawData.png')
+            jj = Image.fromarray(im1arrz)
+            jj.save('data/rawCal.png')
+            imgCC.save('data/CImage.png')
+            snapshot = 0
 
 # Then convert the colorized image to a PhotoImage which auto scales when displayed by Tkinter
-	image = ImageTk.PhotoImage(imgCC)
+        image = ImageTk.PhotoImage(imgCC)
 
         return image
 

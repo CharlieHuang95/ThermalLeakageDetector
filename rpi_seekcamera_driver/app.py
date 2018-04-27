@@ -54,6 +54,7 @@ from scipy import ndimage
 import Tkinter
 import datetime
 import time
+import leakage_detector
 
 class App(Tkinter.Tk):
     def __init__(self,parent):
@@ -512,7 +513,18 @@ class App(Tkinter.Tk):
             # Open the picture you took
             img = Tkinter.PhotoImage(file=filename)
             label.configure(image=img)
-            label.configure(text="the thermal image taken")
+            label.configure(text="Please wait While the photo is being analyzed")
+            time.sleep(1) # Wait one second 
+            leakage = leakage_detector.process(filename, append_os=False)
+            if leakage[1] == "DOOR FRAME NOT FOUND":
+                label.configure(text="Door Frame Not found")
+            else:
+                output_text = "Analysis Completed: " + leakage[1]
+                label.configure(text=output_text)
+                output_filename = "data/" + st + "_img_detected.jpeg"
+                img = Tkinter.PhotoImage(file=output_filename)
+                label.configure(image=img)
+            # Check the leakage returned 
             stop_frame = True
 
 
