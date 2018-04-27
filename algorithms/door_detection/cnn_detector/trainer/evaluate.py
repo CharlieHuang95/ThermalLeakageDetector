@@ -48,14 +48,14 @@ def get_results(args, H):
             img = imresize(orig_img, (H["image_height"], H["image_width"]), interp='cubic')
             feed = {x_in: img}
             (np_pred_boxes, np_pred_confidences) = sess.run([pred_boxes, pred_confidences], feed_dict=feed)
-            for x in range(len(np_pred_boxes)):
-                print(np_pred_boxes[x], np_pred_confidences[x])
-                box = np_pred_boxes[x][0]
-                box = list(map(int, box))
-                box[0] = max(0, box[0])
-                box[1] = max(0, box[1])
-                cv2.rectangle(img, (box[0], box[1]),
-                              (box[2], box[3]), (255, 0, 0))
+            #for x in range(len(np_pred_boxes)):
+                #print(np_pred_boxes[x], np_pred_confidences[x])
+                #box = np_pred_boxes[x][0]
+                #box = list(map(int, box))
+                #box[0] = max(0, box[0])
+                #box[1] = max(0, box[1])
+                #cv2.rectangle(img, (box[0], box[1]),
+                #              (box[2], box[3]), (255, 0, 0))
             #cv2.imwrite("DONE" + str(i) + ".jpg", img)
             #print(np_pred_boxes, np_pred_confidences)
             #continue
@@ -63,12 +63,13 @@ def get_results(args, H):
             pred_anno.imageName = true_anno.imageName
             new_img, rects = add_rectangles(H, [img], np_pred_confidences, np_pred_boxes,
                                             use_stitching=True, rnn_len=H['rnn_len'], min_conf=args.min_conf, tau=args.tau, show_suppressed=args.show_suppressed)
-            print(new_img, "rectangles", rects)
+            #print(new_img, "rectangles", rects)
             pred_anno.rects = rects
             pred_anno.imagePath = os.path.abspath(data_dir)
             pred_anno = rescale_boxes((H["image_height"], H["image_width"]), pred_anno, orig_img.shape[0], orig_img.shape[1])
             pred_annolist.append(pred_anno)
-            
+            for pred in pred_annolist:
+                pred.printContent()
             imname = '%s/%s' % (image_dir, os.path.basename(true_anno.imageName))
             misc.imsave(imname, new_img)
             if i % 25 == 0:

@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.append("/home/Charlie/ThermalLeakageDetector")
 import leakage_detector
 from bottle import route, request, run, static_file, template
 from leakage_types import LeakageTypes

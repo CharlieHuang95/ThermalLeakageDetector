@@ -45,6 +45,7 @@ def denoise(im,templateWindowSize,searchWindowSize,h):
     return cv2.fastNlMeansDenoising(im,None,templateWindowSize,searchWindowSize,h) 
 
 def dilate(im,kernel,iterations):
+    print("LOOK HERE", im)
     return cv2.dilate(im,kernel,iterations=iterations)
 
 def erode(im,kernel,iterations):

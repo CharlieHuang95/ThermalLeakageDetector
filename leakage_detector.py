@@ -26,13 +26,13 @@ def process(image_path,append_os = True, output_image_path = None):
         output_image_path = image_path.split('.')[0] + "_detected.jpeg"
         
     preds = HOG.detect(image)    
-    
+    print("PREDS", preds) 
     if len(preds)==0:
         cv2.imwrite(output_image_path,image)
         return ObjectTypes.DOOR, "DOOR FRAME NOT FOUND"
 
     preds = preds[0]
-    preds *= np.array([156/960,206/1280,156/960,206/1280])
+    preds *= np.array([156.0/960,206.0/1280,156.0/960,206.0/1280])
     preds = preds.astype(int)
 
     leak_type = label.label(pa,image_path,preds[0],preds[2],preds[1],preds[3],outpath=output_image_path)

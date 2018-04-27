@@ -11,6 +11,7 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
     #Door X,Y specify bounding box of door within the original image
     
     im = cv2.imread(img_path,0)
+    print("CHARLIE LOOK HERE ", im)
     #plt.imshow(im,cmap='gray')
     og = np.array(im)
 
@@ -30,6 +31,10 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
     #door = img_temperature[doorY1:doorY2,doorX1:doorX2] #Door pixel temperatures
     door_og = downsized_og[doorY1:doorY2,doorX1:doorX2] #Original door pixels
     door_gs = downsized_og[doorY1:doorY2,doorX1:doorX2] #Modified original door pixels
+
+    print("door_og", door_og)
+    print("y1, y2, x1, x2", doorY1, doorY2, doorX1, doorX2)
+    print("door_gs", door_gs)
     
     kernel = np.ones((5,5),np.uint8)
     door_gs = helpers.dilate(door_gs,kernel,1) #Dilate 
