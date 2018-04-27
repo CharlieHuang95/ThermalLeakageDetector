@@ -10,3 +10,7 @@ class Parameters:
         
         self.WIDTH = 960
         self.HEIGHT = 1280
+        
+        self.min_leak_portion = 0.03
+        
+        self.colors = [(0,0,255),(0,255,0),(255,0,0),(255,255,0),(0,255,255),(255,0,255)]

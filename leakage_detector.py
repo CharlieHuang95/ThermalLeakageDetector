@@ -18,10 +18,9 @@ def process(image_path,append_os = True, output_image_path = None):
     image = cv2.imread(image_path)
     # TODO: Should get prediction on whether window or door
 
-    '''cv2.imshow('im',image)
+    '''cv2.imshow('im',image).
     cv2.waitKey(0)
     cv2.destroyAllWindows()'''
-    
     
     if output_image_path is None: #just output in same folder
         output_image_path = image_path.split('.')[0] + "_detected.jpeg"
@@ -49,9 +48,12 @@ def process_folder(folder_path):
         filename = str(filename)
     
         process(folder_path+'/'+filename[2:-1],append_os = False,\
-                    output_image_path = folder_path+'/../processed_images/'+filename[2:-1])
+                    output_image_path = folder_path+'/../labeled_images/'+filename[2:-1])
         #cv2.imwrite(folder_path+'/../processed_images/'+filename[2:-1],p)
 
 if __name__ == "__main__":
     pass
-    #process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1519937382264.jpg")
+    #process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520017052918.jpg")
+    #process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520032189407.jpg")
+    #process_folder("/algorithms/dataset_processing/dataset/images/raw_images")
+    

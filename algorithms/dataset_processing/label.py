@@ -1,11 +1,13 @@
 import cv2
 import numpy as np
 from . import helpers
-from leakage_types import LeakageTypes
+import leak
 
 #from matplotlib import pyplot as plt
 
-def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,im_name="example.jpeg",image = None):
+def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image = None):
+    color_cycle = 0
+    
     #Door X,Y specify bounding box of door within the original image
     
     im = cv2.imread(img_path,0)
@@ -40,36 +42,70 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,im_name="example.jpeg",image =
 
     #Get outline of leakage areas
     leaks = np.uint8(leaks*255)
-    borders = helpers.line_detector(leaks,2,4)
+    
+    #Seaparte leakage areas into portions
+    min_leak_size = int(pa.min_leak_portion * leaks.size)
+    
+    img_groups,num_groups,leak_classes = leak.group_leaks(leaks,min_leak_size)
+    
+    if len(leak_classes) > 0:
+        leak.validate_leaks(leak_classes,door_gs)
+    
+    # if no regions are labeled
+    if len(leak_classes) == 0:
+        og_rgb = cv2.cvtColor(downsized_og,cv2.COLOR_GRAY2BGR)
+        og_rgb = helpers.resize(og_rgb,960,1280)
+        
+        cv2.rectangle(og_rgb,(int(doorX1*960/156),int(doorY1*1280/206)),\
+              (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[5])
+        cv2.putText(og_rgb,"No problems detected", (180,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),4)
+        cv2.imwrite(outpath,og_rgb)
+        return ["No error"]
+    
+    img_groups = (img_groups/num_groups*255).astype(int)
+
     og_rgb = cv2.cvtColor(downsized_og,cv2.COLOR_GRAY2BGR)
     
-    x,y = np.where(borders)[1], np.where(borders)[0]
-    og_rgb[y+doorY1,x+doorX1] = (0,0,255)
-        
     conv_mask = np.zeros((206,156))
     for j in range(206):
         for i in range(156):
             conv_mask[j,i] = max(((103-j)/103)**2,((78-i)/78)**2)
     conv_mask = helpers.resize(conv_mask,door_gs.shape[1],door_gs.shape[0])
     
-    
-    convolution = np.sum(door_gs * helpers.bw(door_gs,th) * conv_mask)
-    summ = np.sum(door_gs * helpers.bw(door_gs,th))
+    #plt.imshow(img_groups,cmap='gray')
+    for lk in leak_classes:
+        plt.imshow(lk.bw_img,cmap='gray')
+        borders = helpers.outline_leak(lk.bw_img,2,4)
+        
+        x,y = np.where(borders)[1], np.where(borders)[0]
+        og_rgb[y+doorY1,x+doorX1] = pa.colors[color_cycle]
+        
+        lk.classify_leak(door_gs,conv_mask)
+        
+        color_cycle+=1
+        
+    #plt.imshow(og_rgb)
 
-    # TODO: Modify this to reflect leakage type!!!
-    leak_type = LeakageTypes.POOR_INSULATION_LARGE
-    
-    if convolution > 0.75 * summ:
-        # TODO: Modify this to reflect leakage type!!!
-        leak_type = LeakageTypes.AIR_LEAK_TOP
-    
-    top_ind = np.argmin(y)
-    annotate_coordinates = (int(1280/206*(y[top_ind]+doorY1))+20,int(960/156*(x[top_ind]+doorX1)))
     og_rgb = helpers.resize(og_rgb,960,1280)
 
-    cv2.putText(og_rgb,leak_type, annotate_coordinates,cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),3)
-    cv2.imwrite(im_name,og_rgb)
-    return leak_type
+    color_cycle = 0
+
+    for lk in leak_classes:
+        top_ind = np.argmin([pixel[0] for pixel in lk.pixels])
+        annotate_coordinates = (int(1280/206*(lk.pixels[top_ind][0]+doorY1)),int(960/156*(lk.pixels[top_ind][1]+doorX1)))
+        annotate_coordinates = (180,color_cycle*50+80)
+        cv2.putText(og_rgb,lk.leak_type, annotate_coordinates,cv2.FONT_HERSHEY_SIMPLEX,1,pa.colors[color_cycle],3)
+        color_cycle += 1
+        
+    cv2.rectangle(og_rgb,(int(doorX1*960/156),int(doorY1*1280/206)),\
+                  (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[5])
+    
+    #plt.imshow(og_rgb)    
+    
+    #change size here (og_rgb)
+    
+    cv2.imwrite(outpath,og_rgb)
+    return [lk.leak_type  for lk in leak_classes]
 
 if __name__ == '__main__':
     doorX1,doorX2 = 50,107
