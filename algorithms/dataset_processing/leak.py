@@ -1,5 +1,5 @@
 import numpy as np
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import cv2
 from leakage_types import LeakageTypes
 
@@ -173,12 +173,12 @@ if __name__ == '__main__':
             else:
                 test[i][j] = 0
     
-    plt.imshow(test,cmap='gray')
+    #plt.imshow(test,cmap='gray')
     
     d,num_groups,leaks = group_leaks(test,700)
     d = (d/num_groups*255).astype(int)
     
-    plt.imshow(d,cmap='gray')
+    #plt.imshow(d,cmap='gray')
     
     
     
