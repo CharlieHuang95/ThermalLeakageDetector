@@ -44,6 +44,10 @@ class Leak():
                 self.leak_type = LeakageTypes.POOR_INSULATION_LARGE
             else:
                 self.leak_type = LeakageTypes.POOR_INSULATION_SMALL
+                
+    def get_avg(self,thermal_image):
+        self.total = np.sum([thermal_image[pixel] for pixel in self.pixels])
+        self.avg = self.total/len(self.pixels)
         
 def group_leaks(all_leaks,min_size):
     n = 1
@@ -103,6 +107,26 @@ def group_leaks(all_leaks,min_size):
         leaks[i].make_bw_image(all_leaks.shape)
         
     return display_groups, len(leaks), leaks
+
+def validate_leaks(leaks,thermal_image):
+    
+    all_sum = np.sum(thermal_image)
+    leaks_sum = 0
+    leaks_pixels = 0
+    for leak in leaks:
+        leak.get_avg(thermal_image)
+        leaks_sum += leak.total
+        leaks_pixels += len(leak.pixels)
+
+    reg_sum = all_sum - leaks_sum
+    reg_avg = reg_sum/(thermal_image.size-leaks_pixels)
+
+    i=0
+    while(i<len(leaks)):
+        if (leaks[i].avg - reg_avg) < 25:
+            del leaks[i]
+        else:
+            i+=1
     
 def check_neighbour(point, neighbour,group_numbers,leakage_groups):
     if neighbour[0] < 0 or neighbour[0] >= group_numbers.shape[0]:
