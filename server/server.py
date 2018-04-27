@@ -86,7 +86,7 @@ def do_upload():
 
     file_path = "{path}/{file}".format(path=save_path, file=upload.filename)
     upload.save(file_path, overwrite=True)
-    leakage = leakage_detector.process(file_path)
+    leakage = leakage_detector.process(file_path, append_os=False)
     output_file_name = upload.filename.split('.')[0] + "_detected.jpeg"
     static_path = "/static/data/{category}".format(category=category)
     static_addr = "{path}/{file}".format(path=static_path, file=output_file_name)
