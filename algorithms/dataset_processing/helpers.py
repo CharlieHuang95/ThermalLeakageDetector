@@ -50,9 +50,19 @@ def dilate(im,kernel,iterations):
 def erode(im,kernel,iterations):
     return cv2.erode(im,kernel,iterations=iterations)
 
-def line_detector(im,minn,maxx):
-    return cv2.Canny(im,minn,maxx)
-
+def outline_leak(im,minn,maxx):
+    outline = cv2.Canny(im,minn,maxx)
+    
+    for i in range(1):
+        for j in range(im.shape[0]):
+            outline[j][i] = im[j][i]
+            outline[j][-i-1] = im[j][-i-1]
+        for j in range(im.shape[1]):
+            outline[i][j] = im[i][j]
+            outline[-i-1][j] = im[-i-1][j]
+    
+    return outline
+    
 def find_threshold(door_image):
     min_temp = np.min(door_image)
     max_temp = np.max(door_image)
