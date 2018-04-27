@@ -145,7 +145,7 @@ def add_rectangles(H, orig_image, confidences, boxes, use_stitching=False, rnn_l
         acc_rects = all_rects_r
 
 
-    if show_suppressed:
+    if False:#show_suppressed:
         pairs = [(all_rects_r, (255, 0, 0))]
     else:
         pairs = []
