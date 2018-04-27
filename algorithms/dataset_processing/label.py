@@ -6,7 +6,7 @@ import leak
 #from matplotlib import pyplot as plt
 
 def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image = None):
-    color_cycle = 0
+    annotation_num = 0
     
     #Door X,Y specify bounding box of door within the original image
     
@@ -57,8 +57,8 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
         og_rgb = helpers.resize(og_rgb,960,1280)
         
         cv2.rectangle(og_rgb,(int(doorX1*960/156),int(doorY1*1280/206)),\
-              (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[5])
-        cv2.putText(og_rgb,"No problems detected", (180,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),4)
+              (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[-1],thickness=2)
+        cv2.putText(og_rgb,"No problems detected", (180,150),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),4)
         cv2.imwrite(outpath,og_rgb)
         return ["No error"]
     
@@ -74,31 +74,33 @@ def label(pa,img_path,doorX1,doorX2,doorY1,doorY2,outpath="example.jpeg",image =
     
     #plt.imshow(img_groups,cmap='gray')
     for lk in leak_classes:
-        plt.imshow(lk.bw_img,cmap='gray')
+        #plt.imshow(lk.bw_img,cmap='gray')
         borders = helpers.outline_leak(lk.bw_img,2,4)
-        
-        x,y = np.where(borders)[1], np.where(borders)[0]
-        og_rgb[y+doorY1,x+doorX1] = pa.colors[color_cycle]
-        
         lk.classify_leak(door_gs,conv_mask)
         
-        color_cycle+=1
+        x,y = np.where(borders)[1], np.where(borders)[0]
+        og_rgb[y+doorY1,x+doorX1] = pa.colors[lk.color]
+        
+        annotation_num+=1
         
     #plt.imshow(og_rgb)
 
     og_rgb = helpers.resize(og_rgb,960,1280)
 
-    color_cycle = 0
+    annotation_num = 0
+    detected = []
 
     for lk in leak_classes:
         top_ind = np.argmin([pixel[0] for pixel in lk.pixels])
         annotate_coordinates = (int(1280/206*(lk.pixels[top_ind][0]+doorY1)),int(960/156*(lk.pixels[top_ind][1]+doorX1)))
-        annotate_coordinates = (180,color_cycle*50+80)
-        cv2.putText(og_rgb,lk.leak_type, annotate_coordinates,cv2.FONT_HERSHEY_SIMPLEX,1,pa.colors[color_cycle],3)
-        color_cycle += 1
+        annotate_coordinates = (180,annotation_num*50+150)
+        if lk.leak_type not in detected:
+            cv2.putText(og_rgb,lk.leak_type, annotate_coordinates,cv2.FONT_HERSHEY_SIMPLEX,1,pa.colors[lk.color],3)
+            detected.append(lk.leak_type)
+            annotation_num += 1
         
     cv2.rectangle(og_rgb,(int(doorX1*960/156),int(doorY1*1280/206)),\
-                  (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[5])
+                  (int(doorX2*960/156),int(doorY2*1280/206)),pa.colors[-1],thickness=2)
     
     #plt.imshow(og_rgb)    
     
