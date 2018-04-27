@@ -55,5 +55,6 @@ if __name__ == "__main__":
     pass
     #process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520017052918.jpg")
     #process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520032189407.jpg")
-    #process_folder("/algorithms/dataset_processing/dataset/images/raw_images")
+    process("/algorithms/dataset_processing/dataset/images/raw_images/img_thermal_1520032406198.jpg")
+    process_folder("/algorithms/dataset_processing/dataset/images/raw_images")
     

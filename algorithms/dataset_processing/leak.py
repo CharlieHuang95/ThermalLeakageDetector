@@ -19,7 +19,7 @@ class Leak():
         
         summ = np.sum(thermal_image * self.bw_img)
 
-        if convolution > 0.75 * summ:
+        if (self.is_thin() and convolution > 0.6 * summ) or convolution > 0.8 * summ:
             center_of_mass = np.zeros(2)
             total_weight = 0
             for pixel in self.pixels:
@@ -32,18 +32,32 @@ class Leak():
             
             if nearest == 0:
                 self.leak_type = LeakageTypes.AIR_LEAK_TOP
+                self.color = 0
             elif nearest == 1:    
                 self.leak_type = LeakageTypes.AIR_LEAK_BOTTOM
+                self.color = 1
             elif nearest ==2:
                 self.leak_type = LeakageTypes.AIR_LEAK_LEFT
+                self.color = 2
             elif nearest ==3:
                 self.leak_type = LeakageTypes.AIR_LEAK_RIGHT
+                self.color = 3
                 
         else:
-            if len(self.pixels) > 0.25 * self.bw_img.size:
+            if len(self.pixels) > 0.15 * self.bw_img.size:
                 self.leak_type = LeakageTypes.POOR_INSULATION_LARGE
+                self.color = 4
             else:
                 self.leak_type = LeakageTypes.POOR_INSULATION_SMALL
+                self.color = 5
+                
+    def is_thin(self):
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(7,7))
+        eroded = cv2.erode(self.bw_img,kernel,iterations=1)
+        
+        if np.sum(eroded)/np.sum(self.bw_img) < 0.25:
+            return True
+        return False
                 
     def get_avg(self,thermal_image):
         self.total = np.sum([thermal_image[pixel] for pixel in self.pixels])
