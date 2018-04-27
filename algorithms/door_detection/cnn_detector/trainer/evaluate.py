@@ -44,7 +44,7 @@ def get_results(args, H):
         subprocess.call('mkdir -p %s' % image_dir, shell=True)
         for i in range(len(true_annolist)):
             true_anno = true_annolist[i]
-            orig_img = imread('%s/%s' % (data_dir, true_anno.imageName))[:,:,:3]
+            orig_img = cv2.imread('%s/%s' % (data_dir, true_anno.imageName))[:,:,:3]
             img = imresize(orig_img, (H["image_height"], H["image_width"]), interp='cubic')
             feed = {x_in: img}
             (np_pred_boxes, np_pred_confidences) = sess.run([pred_boxes, pred_confidences], feed_dict=feed)
@@ -56,9 +56,9 @@ def get_results(args, H):
                 box[1] = max(0, box[1])
                 cv2.rectangle(img, (box[0], box[1]),
                               (box[2], box[3]), (255, 0, 0))
-            cv2.imwrite("DONE" + str(i) + ".jpg", img)
+            #cv2.imwrite("DONE" + str(i) + ".jpg", img)
             #print(np_pred_boxes, np_pred_confidences)
-            continue
+            #continue
             pred_anno = al.Annotation()
             pred_anno.imageName = true_anno.imageName
             new_img, rects = add_rectangles(H, [img], np_pred_confidences, np_pred_boxes,
