@@ -32,7 +32,7 @@ class HOGTrainer(object):
         self.evaluate(images, annotations)
 
     def evaluate(self, images, annotations):
-        detector = self._detector
+        detector = dlib.simple_object_detector("door_hog_model")
         total = 0
         successful = 0
         difference_array = []
@@ -65,8 +65,10 @@ class HOGTrainer(object):
                 diff[3] /= float(height)
                 difference_array.append(diff)
                 pred = list(map(int, pred))
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 cv2.rectangle(image, (pred[0], pred[2]), (pred[1], pred[3]), (255, 0, 0))
                 cv2.rectangle(image, (gt[0], gt[2]), (gt[1], gt[3]), (0, 255, 0))
+
                 cv2.imwrite("eval/" + str(total) + ".jpg", image)
         difference_array = np.array(difference_array)
 
@@ -85,7 +87,7 @@ def prepare_images(images, annotations):
     for name in annotation_helper.annotations:
         image_path = images + "/" + name
         if not os.path.exists(image_path):
-            print("skipping:", image_path)
+            print("skip")
             continue
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
