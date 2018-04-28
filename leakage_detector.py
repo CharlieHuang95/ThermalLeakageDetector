@@ -1,4 +1,5 @@
 import algorithms.door_detection.hog_door_detector.detector as door_detector
+import algorithms.door_detection.cnn_detector.CNNDetector as cnn_detector
 import dataset_processing.label as label
 import numpy as np
 import cv2
@@ -6,6 +7,7 @@ import os
 import dataset_processing.parameters as parameters
 from object_types import ObjectTypes
 
+CNN = cnn_detector.CNNDetector("/home/Charlie/ThermalLeakageDetector/algorithms/door_detection/cnn_detector/trainer/hypes.json")
 
 os_path = os.path.dirname(os.path.realpath(__file__))
 HOG = door_detector.HOGDetector(os_path + "/algorithms/door_detection/hog_door_detector/model")
@@ -26,6 +28,7 @@ def process(image_path,append_os = True, output_image_path = None):
         output_image_path = image_path.split('.')[0] + "_detected.jpeg"
         
     preds = HOG.detect(image)    
+    pred2 = CNN.detect(image)
     print("PREDS", preds) 
     if len(preds)==0:
         cv2.imwrite(output_image_path,image)
